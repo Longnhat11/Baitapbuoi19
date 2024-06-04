@@ -1,0 +1,185 @@
+﻿﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model List<Baitapbuoi19.Models.Students>
+<style>
+    .row_marging {
+        margin-top: 5px;
+    }
+</style>
+<div class="row">
+    <div class="form-group">
+        <label for="email">ProductName:</label>
+        <input type="email" class="form-control" id="txtProducName">
+    </div>
+
+    <div class="form-group" style="padding-bottom: 60px;">
+        <label for="Title" class="control-label col-md-3">Ảnh sinh vien:<span class="required">*</span></label>
+        <div class="col-md-6">
+            <div class="input-icon right">
+                <input id="upload" class="form-control" type="file" name="upload" accept="image/*" multiple="multiple" />
+                <p style="color:red">Chọn từ 1 - 3 ảnh sinh vien</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="Title" class="control-label col-md-3">ảnh đã chọn:<span class="required">*</span></label>
+        <div class="col-md-6">
+            <div class="input-icon right">
+                <div id="dvPreview">
+                </div>
+                <div id="divAddMoreImage" style="display:none;">
+                    <input type="file" id="fileaddMore" style="display:none">
+                    <a style="cursor:pointer;" onclick="openFileOption();"><i class="fa fa-plus-circle"></i>Thêm ảnh</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ProductClassify">
+                <div class="col-md-2"><input type="text" id="txtStudentName_0" value="" class="form-control" placeholder="Tên sinh vien" /></div>
+                <div class="col-md-2"><input type="text" id="txtStudentGender_0" value="" class="form-control" placeholder="gioi tinh" /></div>
+                <div class="col-md-2"><input type="text" id="txtStudentClass_0" value="" class="form-control" placeholder="lop" /></div>
+                <div class="col-md-2"><input type="text" id="txtEmail_0" value="" class="form-control" placeholder="Email" /></div>
+                <div class="col-md-2"><input type="number" id="txtStudentAge_0" value="" class="form-control" placeholder="tuoi" /></div>
+    </div>
+
+</div>
+<button type="button" id="btnSave" class="btn btn-success">Thêm</button>
+
+<div id="Test_PartialView"></div>
+
+@section Scripts {}
+    <script>
+        $(document).ready(function () {
+
+            LoadData();
+
+            $("#btnSave").click(function () {
+
+                SaveData();
+            });
+
+            $('#upload').on('change', function () {
+                // statusEditAva = 1;
+                if (typeof (FileReader) != "undefined") {
+                    var dvPreview = $("#dvPreview");
+                    dvPreview.html("");
+                    var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.jpg|.jpeg|.gif|.png|.bmp)$/;
+                    var index = 0;
+                    $($(this)[0].files).each(function () {
+                        var file = $(this);
+                        if (regex.test(file[0].name.toLowerCase())) {
+                            var reader = new FileReader();
+                            reader.onload = function (e) {
+                                var img = $("<img class='img_" + index + "'/> <span id='span_img_" + index + "'><a onclick='RemoveProductImage(" + index + ")'>Xóa</a></span> <br/>");
+                                img.attr("style", "height:250px;width: 250px");
+                                img.attr("src", e.target.result);
+                                //  console.log(e.target.result);
+                                dvPreview.append(img);
+                                index++;
+                            }
+                            reader.readAsDataURL(file[0]);
+                        } else {
+                            alert(file[0].name + " is not a valid image file.");
+                            dvPreview.html("");
+                            return false;
+                        }
+
+
+                    });
+                    $("#divAddMoreImage").show();
+                } else {
+                    alert("This browser does not support HTML5 FileReader.");
+                }
+            });
+
+
+
+        });
+
+        function ProductClassify_Add() {
+            var index_count = [];
+            $(".ProductClassify ").each(function (index, value) {
+                index_count.push(index);
+            });
+            console.log(index_count.length);
+            var item_index = index_count.length;
+            console.log("item_index:" + item_index);
+            var html = "";
+            html += "<div class=\"row row_marging productClassify_" + item_index + "\" >";
+            html += "  <div class=\"col-md-2\"><input type=\"text\" id=\"txtStudentName_" + item_index + "\" value=\"\" class=\"form-control\" placeholder=\"Tên sinh vien\" /></div>";
+            html += "   <div class=\"col-md-2\"><input type=\"text\" id=\"txtStudentGender_" + item_index + "\" value=\"\" class=\"form-control\" placeholder=\"gioi tinh\" /></div>";
+            html += "  <div class=\"col-md-2\"><input type=\"text\" id=\"txtStudentClass_" + item_index + "\" value=\"\" class=\"form-control\" placeholder=\"lop\" /></div>";
+            html += "   <div class=\"col-md-2\"><input type=\"text\" id=\"txtEmail_" + item_index + "\" value=\"\" class=\"form-control\" placeholder=\"Email\" /></div>";
+            html += "   <div class=\"col-md-2\"><input type=\"number\" id=\"txtStudentAge_" + item_index + "\" value=\"\" class=\"form-control\" placeholder=\"tuoi\" /></div>";
+            html += "  </div>";
+            $(".ProductClassify").append(html);
+        }
+        function SaveData() {
+
+            debugger;
+            var StuName = "";
+            var StudentGender = "";
+            var StudentClass="";
+            var Email = "";
+            var StudentAge = 0;
+            $(".ProductClassify ").each(function (index, value) {
+                 StuName = $("txtStudentName_" + index).val();
+                 StudentGender = $("txtStudentGender_" + index).val();
+                 StudentClass = $("txtStudentClass_" + index).val();
+                 Email = $("txtEmail_" + index).val();
+                 StudentAge = $("#txtStudentAge_" + index).val();
+            });
+
+            var param = {
+                StuName: StudentName, 
+                StudentGender : StudentGender,
+                StudentClass : StudentClass, 
+                Email:StudentEmail, 
+                StudentAge:StudentAge, 
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: "/Stuedents/Addstudent",
+                data: param,
+                async: true,
+                // dataType: "html",
+                dataType: "json",
+                success: function (rs) {
+                    if (rs.responseCode > 0) {
+
+                        LoadData();
+                    }
+                    alert(rs.responseMessage);
+                },
+                error(rs) {
+                    console.log(JSON.stringify(rs));
+                }
+            });
+        }
+
+        function LoadData() {
+
+            var param = {
+
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: "/Students/Index",
+                data: param,
+                async: true,
+                dataType: "html",
+                // dataType:"json",
+                success: function (rs) {
+                    $("#Test_PartialView").html("");
+                    $("#Test_PartialView").html(rs);
+                },
+                error(rs) {
+                    console.log(JSON.stringify(rs));
+                }
+            });
+        }
+}
